@@ -1,10 +1,15 @@
 
+#include <string>
+
+using namespace std;
 
 class RnnTrainer{
 public:
     RnnTrainer();
     ~RnnTrainer();
+    string loadData(string filepath);
     void train();
+
     /*
     void setRnn(Rnn* rnn);
     void setTrainData(std::vector<std::vector<double>>* trainData);

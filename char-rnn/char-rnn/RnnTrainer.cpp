@@ -1,6 +1,12 @@
 #include <torch/torch.h>
 #include "RnnTrainer.h"
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
 RnnTrainer::RnnTrainer(){
 
 }
@@ -9,10 +15,41 @@ RnnTrainer::~RnnTrainer(){
 
 }
 
+string RnnTrainer::loadData(string filepath){
+    std::cout << "RnnTrainer::loadData()" << std::endl;
+
+    string fileContents;
+    std::ifstream myfile (filepath);
+    bool openedFile = myfile.is_open();
+    if (!openedFile)
+    {
+        return fileContents;
+    }
+
+    // TPC: inefficient - but fine for now
+    string line;
+    while ( getline (myfile,line) )
+    {
+        //cout << line << '\n';
+        fileContents.append(line);
+        fileContents.append("\n");
+    }
+    myfile.close();
+  
+    return fileContents;
+}
+
 void RnnTrainer::train(){
     std::cout << "RnnTrainer::train()" << std::endl;
     torch::manual_seed(1);
     //torch::
+    string fileContents = loadData("../data/input-500.txt");
+    //std::cout << "fileContents: " << fileContents << std::endl;
+    std::cout << "fileContents: " << fileContents.size() << std::endl;
+    if (fileContents.size() == 0){
+        std::cout << "fileContents is empty" << std::endl;
+        return;
+    }
 }
 
 /*
