@@ -3,25 +3,7 @@
 Allow for the creation of library/includes such that additional functionality can be added to PyTorch in C++.
 
 
-## register_module
-
-The code for this was taken from here:
-https://github.com/pytorch/examples/tree/main/cpp/dcgan
-
-### Data
-
-Not sure if this was documented and I missed it - but - the training data is read in C++ using this statement:
-
-```
-  auto dataset = torch::data::datasets::MNIST(kDataFolder)
-                     .map(torch::data::transforms::Normalize<>(0.5, 0.5))
-                     .map(torch::data::transforms::Stack<>());
-```
-
-the name of the files (train-images-idx3-ubyte + train-labels-idx1-ubyte) are apparently hardcoded in the above call (from PyTorch) and can be grabbed from here: 
-
-https://github.com/golbin/TensorFlow-MNIST/tree/master/mnist/data
-
+## char-rnn
 
 ### Build Instructions
 
@@ -37,7 +19,7 @@ and then
 scripts/build_executable.sh
 ```
 
-After this - you should have an executable dcgan in the build directory.
+After this - you should have an executable rnn-text in the build directory.
 
 ### CMake Integration into VS Code + Intellisense
 
@@ -78,3 +60,23 @@ which should output:
 ```
 Saved out.png
 ```
+
+## CMake Resources
+
+- Create .so (shared object) instead of .a from lib
+https://stackoverflow.com/questions/11293572/cmake-create-a-shared-object
+
+- Add directory of files
+    - Apparently this approach (glob) isn't endorsed by owners of CMake
+    https://stackoverflow.com/questions/3201154/automatically-add-all-files-in-a-folder-to-a-target-using-cmake
+    - ended up using the lib/subdirectory approach recommended here:
+    https://stackoverflow.com/a/68360488/5692144
+
+## VS Code CMake Integration
+
+Created the following issue - which I figured out on my own:
+https://github.com/microsoft/vscode-cmake-tools/issues/3018
+
+
+
+

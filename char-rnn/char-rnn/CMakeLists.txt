@@ -1,5 +1,8 @@
 
-add_library(charrnn "")
+# the following seems to result in a .a file being created
+#add_library(charrnn "")
+# the following seems to result in a .dylib file being created
+ADD_LIBRARY(charrnn SHARED "")
 
 # the following block is essentially a copy/paste from the master CMakeLists.txt
 set_property(TARGET charrnn PROPERTY CXX_STANDARD 14)
