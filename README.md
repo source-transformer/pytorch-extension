@@ -2,25 +2,6 @@
 
 Allow for the creation of library/includes such that additional functionality can be added to PyTorch in C++.
 
-## dcgan
-
-Small C++ example to test that we're able to build and link PyTorch. 
-
-### Build Instructions
-
-Run 
-
-```
-scripts/dcgan_gen_makefile.sh
-```
-
-and then
-
-```
-scripts/dcgan_build.sh
-```
-
-After this - you should have an executable dcgan in the build directory.
 
 ## register_module
 
@@ -44,21 +25,29 @@ https://github.com/golbin/TensorFlow-MNIST/tree/master/mnist/data
 
 ### Build Instructions
 
-Same as the other test program - but copy/pasted here anyway:
-
-Run 
+Run the following script: 
 
 ```
-scripts/dcgan_gen_makefile.sh
+scripts/gen_makefile.sh
 ```
 
 and then
 
 ```
-scripts/dcgan_build.sh
+scripts/build_executable.sh
 ```
 
 After this - you should have an executable dcgan in the build directory.
+
+### Intellisense
+
+To get intellisense to work in VS Code - you'll need to use
+
+"CMake: Configure"
+
+"CMake: Build"
+
+after that - intellisense (code completion) should work.
 
 ### How to Look at Progress/Data Refinement
 
