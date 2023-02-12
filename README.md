@@ -39,9 +39,25 @@ scripts/build_executable.sh
 
 After this - you should have an executable dcgan in the build directory.
 
-### Intellisense
+### CMake Integration into VS Code + Intellisense
 
-To get intellisense to work in VS Code - you'll need to use
+#### CMake in VS Code
+
+This project using cmake.  So you might need to tell vs code where cmake is located.  So if you get the following error:
+
+```
+Bad CMake executable: "". Check to make sure it is installed or the value of the "cmake.cmakePath" setting contains the correct path
+```
+
+just run the command "where cmake" and then update your vscode settings like this:
+
+```
+"cmake.cmakePath": "<full file path>"
+```
+
+#### Intellisense
+
+To get intellisense to work in VS Code - you'll need to use vs code's "Command Palette" (on Mac cmd-shift-p) and then run these two:
 
 "CMake: Configure"
 
