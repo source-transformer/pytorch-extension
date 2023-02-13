@@ -4,6 +4,63 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
+
+
+const int SEQ_LENGTH = 10;
+const int INPUT_SIZE = 1;
+const int HIDDEN_SIZE = 32;
+const int NUM_LAYERS = 1;
+const int NUM_EPOCHS = 300;
+const float LEARNING_RATE = 0.001;
+
+struct RNNImpl : torch::nn::Module {
+  RNNImpl()
+      : rnn(torch::nn::RNNOptions(INPUT_SIZE, HIDDEN_SIZE)
+                .num_layers(NUM_LAYERS)
+                .batch_first(true)) {
+    register_module("rnn", rnn);
+  }
+
+  torch::Tensor forward(torch::Tensor x) {
+    // Reset the hidden state.
+    h0 = torch::zeros({NUM_LAYERS, x.size(0), HIDDEN_SIZE});
+    // apparently my version of C++ doesn't understand the following
+    //auto out, hn = rnn->forward(x, h0);
+    std::tuple<torch::Tensor, torch::Tensor> out_hn = rnn->forward(x, h0);
+    torch::Tensor out = std::get<0>(out_hn);
+    torch::Tensor hn = std::get<1>(out_hn);
+    // apparently my version of C++ doesn't understand the following
+    //return out[:, -1, :];
+    auto last_hidden = out.select(1, out.size(1) - 1);
+    return last_hidden;
+  }
+
+  torch::nn::RNN rnn;
+  torch::Tensor h0;
+};
+TORCH_MODULE(RNN);
+
+std::vector<torch::Tensor> load_data(const std::string &file_path) {
+  std::vector<torch::Tensor> data;
+  std::ifstream file(file_path);
+  if (!file.is_open()) {
+    std::cerr << "Failed to open file: " << file_path << std::endl;
+    exit(1);
+  }
+
+  std::string line;
+  while (std::getline(file, line)) {
+    //data.emplace_back(torch::from_blob(line.data(), {1, INPUT_SIZE}).to(torch::kFloat));
+    c10::IntArrayRef c10ArrayIndices = {1, INPUT_SIZE};
+    char* dataCharPtr = const_cast<char*>(line.data());
+    void* dataPtr = dataCharPtr;
+    auto tensor = torch::from_blob(dataPtr, c10ArrayIndices).to(torch::kFloat);
+    data.emplace_back(tensor);
+  }
+
+  return data;
+}
 
 using namespace std;
 
@@ -15,6 +72,7 @@ RnnTrainer::~RnnTrainer(){
 
 }
 
+/*
 string RnnTrainer::loadData(string filepath){
     std::cout << "RnnTrainer::loadData()" << std::endl;
 
@@ -50,6 +108,48 @@ void RnnTrainer::train(){
         std::cout << "fileContents is empty" << std::endl;
         return;
     }
+
+    //torch::nn::LSTM lstm(torch::nn::LSTMOptions(10, 3).num_layers(2));
+    int64_t inputSize = 10;
+    int64_t hiddenSize = 3;
+    //torch::nn::LSTMOptions lstmOpts = torch::nn::LSTMOptions(10, 3).num_layers(2);
+    torch::nn::LSTMOptions lstmOpts1(inputSize, hiddenSize);
+    torch::nn::LSTMOptions lstmOpts2 = lstmOpts1.num_layers(2);
+    torch::nn::LSTM lstm(lstmOpts2);
+}
+*/
+
+void RnnTrainer::train(){
+  // Load the data from file.
+  auto data = load_data("../data/input-500.txt");
+  // the following generated the exception: std::runtime_error: shape '[-1, 10, 1]' is invalid for input of size 501
+  //auto x = torch::stack(data).view({-1, SEQ_LENGTH, INPUT_SIZE});
+  std::cout << "data.size(): " << data.size() << std::endl;
+  int firstDimension = (data.size() / SEQ_LENGTH / INPUT_SIZE) + 1;
+  // The size of a tensor is determined by its number of elements, which is the product of the sizes of all dimensions. 
+  //auto x = torch::stack(data).view({firstDimension, SEQ_LENGTH, INPUT_SIZE});
+  torch::Tensor dataTensor = torch::stack(data);
+  //auto x = dataTensor.view({firstDimension, SEQ_LENGTH, INPUT_SIZE});
+  auto x = dataTensor;
+  auto y = torch::randn({x.size(0), HIDDEN_SIZE});
+
+  // Initialize the model and optimizer.
+  auto model = RNN();
+  torch::optim::Adam optimizer(model->parameters(), LEARNING_RATE);
+
+  // Train the model.
+  for (int epoch = 1; epoch <= NUM_EPOCHS; ++epoch) {
+    auto y_pred = model->forward(x);
+    auto loss = torch::mse_loss(y_pred, y);
+
+    optimizer.zero_grad();
+    loss.backward();
+    optimizer.step();
+
+    if (epoch % 100 == 0) {
+      std::cout << "Epoch: " << epoch << ", Loss: " << loss.item<float>() << std::endl;
+    }
+  }
 }
 
 /*
